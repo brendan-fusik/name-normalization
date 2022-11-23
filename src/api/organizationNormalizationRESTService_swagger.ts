@@ -53,7 +53,6 @@ export enum ContentType {
   Json = "application/json",
   FormData = "multipart/form-data",
   UrlEncoded = "application/x-www-form-urlencoded",
-  Text = "text/plain",
 }
 
 export class HttpClient<SecurityDataType = unknown> {
@@ -78,16 +77,16 @@ export class HttpClient<SecurityDataType = unknown> {
     this.securityData = data;
   };
 
-  protected encodeQueryParam(key: string, value: any) {
+  private encodeQueryParam(key: string, value: any) {
     const encodedKey = encodeURIComponent(key);
     return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
   }
 
-  protected addQueryParam(query: QueryParamsType, key: string) {
+  private addQueryParam(query: QueryParamsType, key: string) {
     return this.encodeQueryParam(key, query[key]);
   }
 
-  protected addArrayQueryParam(query: QueryParamsType, key: string) {
+  private addArrayQueryParam(query: QueryParamsType, key: string) {
     const value = query[key];
     return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
   }
@@ -108,7 +107,6 @@ export class HttpClient<SecurityDataType = unknown> {
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
       input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
-    [ContentType.Text]: (input: any) => (input !== null && typeof input !== "string" ? JSON.stringify(input) : input),
     [ContentType.FormData]: (input: any) =>
       Object.keys(input || {}).reduce((formData, key) => {
         const property = input[key];
@@ -125,7 +123,7 @@ export class HttpClient<SecurityDataType = unknown> {
     [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
   };
 
-  protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
+  private mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
     return {
       ...this.baseApiParams,
       ...params1,
@@ -138,7 +136,7 @@ export class HttpClient<SecurityDataType = unknown> {
     };
   }
 
-  protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
+  private createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
     if (this.abortControllers.has(cancelToken)) {
       const abortController = this.abortControllers.get(cancelToken);
       if (abortController) {
@@ -185,10 +183,10 @@ export class HttpClient<SecurityDataType = unknown> {
     return this.customFetch(`${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`, {
       ...requestParams,
       headers: {
-        ...(requestParams.headers || {}),
         ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
+        ...(requestParams.headers || {}),
       },
-      signal: cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal,
+      signal: cancelToken ? this.createAbortSignal(cancelToken) : void 0,
       body: typeof body === "undefined" || body === null ? null : payloadFormatter(body),
     }).then(async (response) => {
       const r = response as HttpResponse<T, E>;
@@ -232,13 +230,8 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name Get
      * @request GET:/getsomething
      */
-    get: (
-      query: {
-        id: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<String, any>({
+    get: (query: { id: string }, params: RequestParams = {}) =>
+      this.request<Object, any>({
         path: `/getsomething`,
         method: "GET",
         query: query,

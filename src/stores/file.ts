@@ -16,13 +16,23 @@ export const useFileStore = defineStore("normalFile", {
 
   actions: {
     async fetchInformation() {
+      console.log("Making a call to the backend")
       return new Promise((resolve, reject) => {
         API.getsomething
           .get({ id: "someid" })
-          .then((response) => console.log(response.data))
-          .catch((error) => {
-            reject(error);
-          });
+            .then((value) => {
+                if (value.ok) {
+                    value.text().then((id) => {
+                        console.log("Got ID:", id);
+                        resolve(id);
+                    });
+                } else {
+                    reject(value);
+                }
+            })
+            .catch((reason) => {
+                reject(reason);
+            });
       });
     },
   },
