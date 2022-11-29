@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import HelloWorld from "./components/HelloWorld.vue";
-import TheWelcome from "./components/TheWelcome.vue";
+import HelloWorld from "./components/MainSelection.vue";
+
 let file = null;
 </script>
 
@@ -13,6 +13,4 @@ let file = null;
   </header>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
