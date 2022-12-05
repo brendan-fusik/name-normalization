@@ -229,21 +229,21 @@ export class HttpClient<SecurityDataType = unknown> {
  * @title No title
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
-  getsomething = {
+  normalize = {
     /**
      * No description
      *
      * @name Get
-     * @request GET:/getsomething
+     * @request GET:/normalize
      */
     get: (
-      query: {
-        id: string;
-      },
+        query: {
+          id: string;
+        },
       params: RequestParams = {},
     ) =>
       this.request<Object, any>({
-        path: `/getsomething`,
+        path: `/normalize`,
         method: "GET",
         query: query,
         ...params,

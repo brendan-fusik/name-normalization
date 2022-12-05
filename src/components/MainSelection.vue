@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive } from "vue";
-import { useFileStore } from "@/stores/file";
+import {reactive} from "vue";
+import {useFileStore} from "@/stores/file";
 
 defineProps<{}>();
 const state = reactive({
@@ -8,19 +8,31 @@ const state = reactive({
   readyToDownload: false,
 });
 const fileModule = useFileStore();
-const handleChange = (e) => {
-  console.log(e.target.files[0]);
-  //const formData = new FormData()
-  //formData.append("newfile", e.target.files[0], e.target.files[0].name)
-  fileModule.uploadFile(e.target.files[0]);
-  //CHANGE THIS TO HAPPEN AFTER FILE HAS BEEN PROCESSED
+
+const testState = () => {
+  let str = "it works"
+  fileModule.stateTest(str)
+  alert(fileModule.getUpload.downloadId)
+
+}
+
+const curateFile = async () => {
+  console.log("Upload Id", fileModule.getUpload.uploadId)
+  await fileModule.doNormalization(fileModule.getUpload.uploadId)
+  console.log("Download Id", fileModule.getUpload.downloadId)
+}
+
+
+const handleChange = async (e) => {
+  await fileModule.uploadFile(e.target.files[0]);
   state.readyToDownload = true;
+  console.log(fileModule.getUpload.uploadId)
 };
 
 const handleDownload = () => {
-  let id = "f0b9ddab7c3f4fa1b3cec88e8dea8330";
+  let id = fileModule.getUpload.downloadId;
   window.open(
-    "http://localhost:8080/normalize/normfile/download/" + id + "?id=" + id
+      "http://localhost:8080/normalize/normfile/download/" + id + "?id=" + id
   );
 };
 </script>
@@ -28,7 +40,7 @@ const handleDownload = () => {
 <template>
   <div class="greetings">
     <h1 class="green">Name Normalization Tool</h1>
-
+    <button @click="testState">Test</button>
     <div class="buttons">
       <label class="file-select">
         <div>
@@ -40,7 +52,7 @@ const handleDownload = () => {
         <input type="file" @change="handleChange" />
       </label>
       <div>
-        <button class="download" :disabled="!state.readyToDownload">
+        <button class="download" @click="curateFile">
           Normalize File
         </button>
       </div>
@@ -48,7 +60,6 @@ const handleDownload = () => {
         <button
           class="download"
           @click="handleDownload"
-          :disabled="state.readyToDownload"
         >
           Download Ready
         </button>

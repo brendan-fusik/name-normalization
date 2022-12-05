@@ -1,32 +1,36 @@
-import { defineStore } from "pinia";
-import { Api as uploadAPI } from "@/api/organizationNormalizationRESTService_swagger";
+import {defineStore} from "pinia";
+import {Api as uploadAPI} from "@/api/organizationNormalizationRESTService_swagger";
 
 const API = new uploadAPI({
   baseUrl: "/normalize",
 });
 
 export const useFileStore = defineStore("normalFile", {
-  state: () => {
-    return {
-      id: {},
-    };
+  state: () => ({
+    uploadId: "",
+    downloadId: "",
+  }),
+  getters: {
+    getUpload: (uploadId) => uploadId,
+    getDownload: (downloadId) => downloadId
   },
 
   actions: {
-    async fetchInformation() {
+    async doNormalization(uploadId: string) {
       console.log("Making a call to the backend");
       return new Promise((resolve, reject) => {
-        API.getsomething
-          .get({ id: "someid" })
-          .then((value) => {
-            if (value.ok) {
-              value.text().then((id) => {
-                console.log("Got ID:", id);
-                resolve(id);
-              });
-            } else {
-              reject(value);
-            }
+        API.normalize
+            .get({id: uploadId})
+            .then((value) => {
+              if (value.ok) {
+                value.text().then((id) => {
+                  console.log("Got ID:", id);
+                  this.downloadId = id;
+                  resolve(id);
+                });
+              } else {
+                reject(value);
+              }
           })
           .catch((reason) => {
             reject(reason);
@@ -39,7 +43,9 @@ export const useFileStore = defineStore("normalFile", {
         API.normfile
           .upload({ temporary: true, appName: "normalize" }, { file: file })
           .then((res) => {
-            console.log(res);
+            this.uploadId = res.data.response
+            console.log(this.uploadId);
+
             resolve(res);
           })
           .catch((reason) => {
@@ -54,15 +60,19 @@ export const useFileStore = defineStore("normalFile", {
           .download(id, {
             id: id,
           })
-          .then((res) => {
-            console.log("response, value is ok");
-            console.log(res);
-            resolve(res);
-          })
-          .catch((reason) => {
-            reject(reason);
-          });
+            .then((res) => {
+              console.log("response, value is ok");
+              console.log(res);
+              resolve(res);
+            })
+            .catch((reason) => {
+              reject(reason);
+            });
       });
     },
+    stateTest(str: string) {
+      this.uploadId = str
+
+    }
   },
 });
