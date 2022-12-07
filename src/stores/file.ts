@@ -12,39 +12,37 @@ export const useFileStore = defineStore("normalFile", {
   }),
   getters: {
     getUpload: (uploadId) => uploadId,
-    getDownload: (downloadId) => downloadId
+    getDownload: (downloadId) => downloadId,
   },
 
   actions: {
     async doNormalization(uploadId: string) {
-      console.log("Making a call to the backend");
       return new Promise((resolve, reject) => {
         API.normalize
             .get({id: uploadId})
             .then((value) => {
               if (value.ok) {
                 value.text().then((id) => {
-                  console.log("Got ID:", id);
                   this.downloadId = id;
                   resolve(id);
                 });
               } else {
                 reject(value);
               }
-          })
+            })
           .catch((reason) => {
             reject(reason);
           });
       });
     },
     async uploadFile(file: File) {
-      console.log(file);
       return new Promise((resolve, reject) => {
         API.normfile
           .upload({ temporary: true, appName: "normalize" }, { file: file })
           .then((res) => {
-            this.uploadId = res.data.response
-            console.log(this.uploadId);
+            if (res.data.response != null) {
+              this.uploadId = res.data.response;
+            }
 
             resolve(res);
           })
@@ -57,9 +55,9 @@ export const useFileStore = defineStore("normalFile", {
       console.log(id);
       return new Promise((resolve, reject) => {
         API.normfile
-          .download(id, {
-            id: id,
-          })
+            .download(id, {
+              id: id,
+            })
             .then((res) => {
               console.log("response, value is ok");
               console.log(res);
@@ -71,8 +69,7 @@ export const useFileStore = defineStore("normalFile", {
       });
     },
     stateTest(str: string) {
-      this.uploadId = str
-
-    }
+      this.uploadId = str;
+    },
   },
 });
